@@ -1,0 +1,171 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="theme-color" content="#0f8b8d">
+<link rel="manifest" href="manifest.webmanifest">
+<link rel="apple-touch-icon" href="apple-touch-icon.png">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="default">
+<meta name="apple-mobile-web-app-title" content="90 Days">
+<title>90 Days Hard</title>
+<style>
+:root{--bg:#f2f5f7;--card:#fff;--ink:#14213d;--mute:#5b6b7f;--line:#d5dde5;--acc:#0f8b8d;--accsoft:#cfeceb;--warn:#e07a1f;box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]){--bg:#0f1722;--card:#18232f;--ink:#e8eef4;--mute:#93a3b5;--line:#2b3947;--acc:#3cc4c6;--accsoft:#16413f;--warn:#f0954a}}
+:root[data-theme="dark"]{--bg:#0f1722;--card:#18232f;--ink:#e8eef4;--mute:#93a3b5;--line:#2b3947;--acc:#3cc4c6;--accsoft:#16413f;--warn:#f0954a}
+*{box-sizing:border-box}
+html{scroll-padding-top:env(safe-area-inset-top,0px)}
+body{margin:0;background:var(--bg);color:var(--ink);font-family:"Bricolage Grotesque",system-ui,-apple-system,"Segoe UI",Roboto,sans-serif;line-height:1.45}
+main{max-width:640px;margin:0 auto;padding:20px 16px 48px}
+h1{font-size:2rem;margin:0;letter-spacing:-.02em;font-weight:800}
+.sub{color:var(--mute);margin:2px 0 18px}
+.stats{display:flex;gap:10px;margin-bottom:16px}
+.stat{flex:1;background:var(--card);border:1px solid var(--line);border-radius:12px;padding:10px 12px}
+.stat b{display:block;font-size:1.5rem}
+.stat span{color:var(--mute);font-size:.85rem}
+.bar{height:8px;background:var(--line);border-radius:8px;overflow:hidden;margin-bottom:18px}
+.bar i{display:block;height:100%;background:var(--acc);width:0;transition:width .3s}
+.grid{display:grid;grid-template-columns:repeat(10,1fr);gap:5px;margin-bottom:6px}
+.cell{aspect-ratio:1;border:1px solid var(--line);background:var(--card);color:var(--mute);border-radius:7px;font:inherit;font-size:.75rem;cursor:pointer;padding:0}
+.cell.part{background:var(--accsoft);color:var(--ink)}
+.cell.full{background:var(--acc);border-color:var(--acc);color:#fff;font-weight:700}
+.cell.sel{outline:3px solid var(--ink);outline-offset:1px}
+.legend{color:var(--mute);font-size:.8rem;margin:0 0 22px}
+.phase{font-weight:700;color:var(--acc);margin:0}
+.phasenote{color:var(--mute);margin:0 0 12px;font-size:.92rem}
+.head{display:flex;align-items:center;justify-content:space-between;gap:10px;flex-wrap:wrap;margin-bottom:10px}
+h2{margin:0;font-size:1.4rem}
+.modes{display:flex;border:1px solid var(--line);border-radius:10px;overflow:hidden}
+.modes button{font:inherit;border:0;background:var(--card);color:var(--ink);padding:8px 12px;cursor:pointer}
+.modes button.on{background:var(--ink);color:var(--bg)}
+.list{background:var(--card);border:1px solid var(--line);border-radius:14px;overflow:hidden}
+.list h3{margin:0;padding:10px 14px;font-size:.9rem;color:var(--mute);background:var(--bg);border-bottom:1px solid var(--line)}
+label.task{display:flex;gap:12px;align-items:flex-start;padding:13px 14px;border-bottom:1px solid var(--line);cursor:pointer}
+label.task:last-child{border-bottom:0}
+label.task input{width:22px;height:22px;accent-color:var(--acc);flex:none;margin-top:1px}
+label.task small{display:block;color:var(--mute)}
+label.task.done span{text-decoration:line-through;color:var(--mute)}
+.extra h3{color:var(--warn)}
+.foot{display:flex;justify-content:space-between;align-items:center;margin-top:16px;gap:10px;flex-wrap:wrap}
+button.link{font:inherit;background:none;border:0;color:var(--mute);text-decoration:underline;cursor:pointer;padding:6px 0}
+button.next{font:inherit;font-weight:700;background:var(--acc);color:#fff;border:0;border-radius:10px;padding:10px 16px;cursor:pointer}
+button:focus-visible,input:focus-visible{outline:3px solid var(--warn);outline-offset:2px}
+.rule{margin-top:22px;padding:12px 14px;border-left:4px solid var(--warn);background:var(--card);border-radius:0 10px 10px 0;font-size:.92rem}
+</style>
+</head>
+<body>
+<main>
+  <h1>90 Days Hard</h1>
+  <p class="sub">One day at a time. Not tied to dates, so it works with a shift pattern you don't control.</p>
+
+  <div class="stats">
+    <div class="stat"><b id="sDone">0</b><span>days completed</span></div>
+    <div class="stat"><b id="sStreak">0</b><span>day streak</span></div>
+    <div class="stat"><b id="sLeft">90</b><span>days to go</span></div>
+  </div>
+  <div class="bar" aria-hidden="true"><i id="bar"></i></div>
+
+  <div class="grid" id="grid"></div>
+  <p class="legend">Tap any day to open it. Dark teal = all done, light = partly done.</p>
+
+  <p class="phase" id="phase"></p>
+  <p class="phasenote" id="phaseNote"></p>
+
+  <div class="head">
+    <h2 id="dayTitle">Day 1</h2>
+    <div class="modes" role="group" aria-label="Type of day">
+      <button id="mWork">Work day</button>
+      <button id="mOff">Day off</button>
+    </div>
+  </div>
+
+  <div class="list" id="core"></div>
+  <div class="list extra" id="extra" style="margin-top:12px"></div>
+
+  <div class="foot">
+    <button class="link" id="reset">Reset all progress</button>
+    <button class="next" id="next">Next day</button>
+  </div>
+
+  <div class="rule"><b>Never miss twice.</b> Bad day? Do just the first three ticks. The streak survives a small day, not a skipped one.</div>
+</main>
+
+<script>
+(function(){
+  var KEY="ninetyDaysHard.v1";
+  var CORE=[
+    {id:"move",t:"Move your body",w:"10 min at home: squats, push-ups, plank, lunges (no gym needed)",o:"30-45 min: run, long walk, or a full home workout"},
+    {id:"learn",t:"Work on your skill or project",w:"20 min, even on the bus or lunch break",o:"60 min focused session"},
+    {id:"read",t:"Read 10 pages",w:"A real book, not social media",o:"Read 10+ pages"},
+    {id:"water",t:"Drink 2 litres of water",w:"Fill a bottle at the start of your shift",o:"Same, keep a bottle nearby"},
+    {id:"phone",t:"No phone for the first 30 minutes awake",w:"",o:""},
+    {id:"plan",t:"Write tomorrow's top 3 priorities",w:"5 minutes before bed",o:"5 minutes before bed"},
+    {id:"sleep",t:"In bed on time",w:"Within 30 min of your target. Shifts make this the one that matters most",o:"Same target time"}
+  ];
+  var EXTRA=[
+    {id:"x1",t:"Meal prep for the next work days",w:""},
+    {id:"x2",t:"Tidy one area of your space",w:""},
+    {id:"x3",t:"Do something social or fun",w:""}
+  ];
+  var PHASES=[
+    ["Phase 1: Foundation (days 1-30)","Consistency over intensity. Pick your one main goal for the 90 days and write it down."],
+    ["Phase 2: Build (days 31-60)","Raise the standard: add about 25% to your workouts and skill time, and add one new habit."],
+    ["Phase 3: Push (days 61-90)","Take on a stretch challenge, share what you've learned, and decide what stays after day 90."]
+  ];
+  var S={cur:1,days:{}};
+  try{var raw=localStorage.getItem(KEY);if(raw){var p=JSON.parse(raw);if(p&&p.days){S=p}}}catch(e){}
+  function save(){try{localStorage.setItem(KEY,JSON.stringify(S))}catch(e){}}
+  function day(n){if(!S.days[n])S.days[n]={m:"w",c:{}};return S.days[n]}
+  function total(n){var d=S.days[n];return CORE.length+(d&&d.m==="o"?EXTRA.length:0)}
+  function count(n){var d=S.days[n];if(!d)return 0;var ids=CORE.map(function(x){return x.id});if(d.m==="o")ids=ids.concat(EXTRA.map(function(x){return x.id}));return ids.filter(function(i){return d.c[i]}).length}
+  function status(n){var c=count(n);if(!c)return"";return c>=total(n)?"full":"part"}
+  var $=function(i){return document.getElementById(i)};
+
+  function renderList(el,items,title,d,off){
+    var h='<h3>'+title+'</h3>';
+    items.forEach(function(x){
+      var sub=off?(x.o!==undefined?x.o:x.w):x.w;
+      var on=d.c[x.id];
+      h+='<label class="task'+(on?' done':'')+'"><input type="checkbox" data-id="'+x.id+'"'+(on?' checked':'')+'><span>'+x.t+(sub?'<small>'+sub+'</small>':'')+'</span></label>';
+    });
+    el.innerHTML=h;
+  }
+
+  function render(){
+    var n=S.cur,d=day(n),off=d.m==="o";
+    var g="";
+    for(var i=1;i<=90;i++){g+='<button class="cell '+status(i)+(i===n?' sel':'')+'" data-d="'+i+'" aria-label="Day '+i+'">'+i+'</button>'}
+    $("grid").innerHTML=g;
+    var ph=PHASES[n<=30?0:n<=60?1:2];
+    $("phase").textContent=ph[0];$("phaseNote").textContent=ph[1];
+    $("dayTitle").textContent="Day "+n+" of 90";
+    $("mWork").className=off?"":"on";$("mOff").className=off?"on":"";
+    renderList($("core"),CORE,off?"Every day (day-off version)":"Every day (work-day version)",d,off);
+    if(off){renderList($("extra"),EXTRA,"Day-off extras",d,true);$("extra").style.display=""}else{$("extra").style.display="none"}
+    var done=0,streak=0,k;
+    for(k=1;k<=90;k++){if(status(k)==="full")done++}
+    k=90;while(k>=1&&status(k)!=="full")k--;
+    while(k>=1&&status(k)==="full"){streak++;k--}
+    $("sDone").textContent=done;$("sStreak").textContent=streak;$("sLeft").textContent=90-done;
+    $("bar").style.width=(done/90*100)+"%";
+    $("next").textContent=n>=90?"Finish":"Next day";
+    save();
+  }
+
+  $("grid").addEventListener("click",function(e){var b=e.target.closest(".cell");if(b){S.cur=+b.dataset.d;render()}});
+  document.addEventListener("change",function(e){
+    var t=e.target;if(t.type!=="checkbox")return;
+    day(S.cur).c[t.dataset.id]=t.checked;render();
+  });
+  $("mWork").onclick=function(){day(S.cur).m="w";render()};
+  $("mOff").onclick=function(){day(S.cur).m="o";render()};
+  $("next").onclick=function(){if(S.cur<90)S.cur++;render();window.scrollTo({top:0,behavior:"smooth"})};
+  $("reset").onclick=function(){if(confirm("Reset all 90 days? This can't be undone.")){S={cur:1,days:{}};render()}};
+  render();
+})();
+</script>
+<script>if("serviceWorker" in navigator){window.addEventListener("load",function(){navigator.serviceWorker.register("sw.js").catch(function(){})})}</script>
+</body>
+</html>
